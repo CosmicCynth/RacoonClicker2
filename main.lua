@@ -1,3 +1,5 @@
+--MAke stool that helps helpers
+
 local width,height = love.graphics.getDimensions()
 love.math.setRandomSeed(love.timer.getTime())
 font = love.graphics.newFont("fonts/font.ttf",17)
@@ -14,11 +16,15 @@ function love.load()
     player.hardhelpers = {}
     player.hardhelpers.amount = 0
 
+    player.stool = 0 
+
 
     player.amountPrice = 5
     player.clickCooldownPrice = 300
     player.helperPrice = 20
     player.hardHelperPrice = 2000
+    player.multiPrice  = 125000
+    player.stoolPrice = 1000000
 
     player.moods = {}
     player.moods.mood = "basic" 
@@ -50,8 +56,7 @@ function love.load()
 
     --Mood timer
     mTimer = 0
-    --mMTimer = 1200
-    mMTimer = 240
+    mMTimer = 300
 
 
     --Background
@@ -85,40 +90,38 @@ function love.update(dt)
     if hTimer >= hMTimer and player.helpers.amount >= 1 then
         hTimer = 0
         helperPaySFX:play()
-        player.clicks = player.clicks + player.helpers.amount * player.multi * player.amount
+        player.clicks = player.clicks + 0.70 * (player.helpers.amount * player.multi * player.amount)
         if player.hardhelpers.amount >= 1 then
-            player.clicks = player.clicks + player.hardhelpers.amount * 20 * player.multi * player.amount
+            player.clicks = player.clicks + player.hardhelpers.amount * 17 * player.multi * player.amount
         end
     end
 
-    if love.keyboard.isDown("w") and uTimer >= uMtimer then
+    if love.keyboard.isDown("w") and uTimer >= uMtimer and player.clicks >= player.amountPrice then
         upgradeAmount()
     end
 
-    if love.keyboard.isDown("q") and uTimer >= uMtimer then
+    if love.keyboard.isDown("q") and uTimer >= uMtimer and player.clicks >= player.clickCooldownPrice then
         upgradeCTimer()
     end
 
-    if love.keyboard.isDown("e") and uTimer >= uMtimer then
+    if love.keyboard.isDown("e") and uTimer >= uMtimer and player.clicks >= player.helperPrice then
         upgradeHelper()
     end
 
-    if love.keyboard.isDown("r") and uTimer >= uMtimer then
+    if love.keyboard.isDown("r") and uTimer >= uMtimer and player.clicks >= player.hardHelperPrice then
         upgradeHardHelper()
     end
 
+    if love.keyboard.isDown("t") and uTimer >= uMtimer and player.clicks >= player.multiPrice then
+        upgradeMulti()
+    end
 
 end
 
 function love.draw()
     love.graphics.draw(background)
-    love.graphics.setFont(font)
-    love.graphics.setColor(0,0,0)
-    love.graphics.print("Stats! \nMoney: "..math.floor(player.clicks).."$\nAmount level: "..player.amount.."\nCooldown: "..CMTimer.."\nHelper level: "..player.helpers.amount.."\nHard working helper level: "..player.hardhelpers.amount)
 
-    
-    love.graphics.print("Upgrade prices! \nAmount price: "..math.floor(player.amountPrice).."$\nCooldown price: "..math.floor(player.clickCooldownPrice).."$\nHelper price: "..math.floor(player.helperPrice).."$\nHard-working helper price: "..math.floor(player.hardHelperPrice).."$\n",0,578-20*4)
-    love.graphics.setColor(1,1,1)
+ 
     for i, helper in ipairs(player.helpers) do
         love.graphics.draw(helper.sprite,helper.x,helper.y)
     end
@@ -126,6 +129,13 @@ function love.draw()
     for i, hardhelper in ipairs(player.hardhelpers) do
         love.graphics.draw(hardhelper.sprite,hardhelper.x,hardhelper.y)
     end
+
+    love.graphics.setFont(font)
+    love.graphics.setColor(0,0,0)
+    love.graphics.print("Stats! \nMoney: "..math.floor(player.clicks).."$\nAmount level: "..player.amount.."\nCooldown: "..CMTimer.."\nHelper level: "..player.helpers.amount.."\nHard working\nhelper level: "..player.hardhelpers.amount.."\nMultiplier level: "..player.multi)
+    
+    love.graphics.print("Upgrade prices! \nAmount price: "..math.floor(player.amountPrice).."$ Press W to buy\nCooldown price: "..math.floor(player.clickCooldownPrice).."$ Press Q to buy\nHelper price: "..math.floor(player.helperPrice).."$ Press E to buy\nHard working helper price: "..math.floor(player.hardHelperPrice).."$ Press R to buy\nMultiplier price: "..math.floor(player.multiPrice).."$ Press T to buy",0,578-20*5)
+    love.graphics.setColor(1,1,1)
 
     if player.moods.mood == "basic" then
         love.graphics.draw(player.moods.basic,width/2,height/2,nil,nil,nil,117,113)
@@ -169,7 +179,7 @@ function upgradeAmount()
     uTimer = 0
     player.amount = player.amount + 1
     player.clicks = player.clicks - player.amountPrice
-    player.amountPrice = player.amountPrice * 1.25
+    player.amountPrice = player.amountPrice * 1.33
 end
 
 function upgradeCTimer()
@@ -185,18 +195,31 @@ function upgradeHelper()
     upgradeSFX:play()
     uTimer = 0
     player.helpers.amount = player.helpers.amount + 1
-    spawnHelper(sprite, love.math.random(200,700), love.math.random(0,500))
+    spawnHelper(sprite, love.math.random(200,700), love.math.random(0,350))
     player.clicks = player.clicks - player.helperPrice
-    player.helperPrice = player.helperPrice * 1.1
+    player.helperPrice = player.helperPrice * 1.25
 end
 
 function upgradeHardHelper()
     upgradeSFX:play()
     uTimer = 0
     player.hardhelpers.amount = player.hardhelpers.amount + 1
-    spawnHardHelper(sprite,love.math.random(200,700), love.math.random(0,500))
+    spawnHardHelper(sprite,love.math.random(200,700), love.math.random(0,350))
     player.clicks = player.clicks - player.hardHelperPrice
     player.hardHelperPrice = player.hardHelperPrice * 1.5
+end
+
+function upgradeMulti()
+    upgradeSFX:play()
+    uTimer = 0
+    player.multi = player.multi + 1
+    player.clicks = player.clicks - player.multiPrice
+    player.multiPrice = player.multiPrice * 3
+end
+
+function upgradeStool()
+    upgradeSFX:play()
+    uTimer = 0
 end
 
 function spawnHelper(sprite,x,y)
@@ -214,6 +237,8 @@ function spawnHardHelper(sprite,x,y)
     hardHelper.y = y
     table.insert(player.hardhelpers,hardHelper)
 end
+
+
 
 function moodPicker(value)
     if value == 1 then
