@@ -9,6 +9,7 @@ function love.load()
     player.amount = 1
     player.multi = 1 
     player.helperToys = 1
+    player.hacks = 0
 
     player.helpers = {}
     player.helpers.amount = 0
@@ -31,6 +32,7 @@ function love.load()
     player.queenPrice = 1000000
     player.helperToysPrice = 50000
     player.cryptohelperPrice = 10000000
+    player.hackPrice = 100
 
 
 
@@ -166,6 +168,10 @@ function love.update(dt)
         upgradeCryptoRacoon()
     end
 
+    if love.keyboard.isDown("o") and uTimer >= uMtimer and player.cooncoins >= player.hackPrice then
+        upgradeHack()
+    end
+
 end
 
 function love.draw()
@@ -190,9 +196,9 @@ function love.draw()
 
     love.graphics.setFont(font)
     love.graphics.setColor(0,0,0)
-    love.graphics.print("Stats! \nMoney: "..math.floor(player.clicks).."$\nCoon Coins: "..math.floor(player.cooncoins).."$\nAmount level: "..player.amount.."\nCooldown: "..CMTimer.."\nHelper level: "..player.helpers.amount.."\nHard working\nhelper level: "..player.hardhelpers.amount.."\nMultiplier level: "..player.multi.."\nQueen level: "..player.queenhelpers.amount.."\nHelper toys level: "..(player.helperToys-1).."\nCrypto helper level: "..player.cryptohelpers.amount)
+    love.graphics.print("Stats! \nMoney: "..math.floor(player.clicks).."$\nCoon Coins: "..math.floor(player.cooncoins).."$\nAmount level: "..player.amount.."\nCooldown: "..CMTimer.."\nHelper level: "..player.helpers.amount.."\nHard working\nhelper level: "..player.hardhelpers.amount.."\nMultiplier level: "..player.multi.."\nQueen level: "..player.queenhelpers.amount.."\nHelper toys level: "..(player.helperToys-1).."\nCrypto helper level: "..player.cryptohelpers.amount.."\nHacks on mainframe: "..player.hacks)
     
-    love.graphics.print("Upgrade prices! \nAmount price: "..math.floor(player.amountPrice).."$ Press W to buy\nCooldown price: "..math.floor(player.clickCooldownPrice).."$ Press Q to buy\nHelper price: "..math.floor(player.helperPrice).."$ Press E to buy\nHard working helper price: "..math.floor(player.hardHelperPrice).."$ Press R to buy\nMultiplier price: "..math.floor(player.multiPrice).."$ Press T to buy".."\nQueen price: "..math.floor(player.queenPrice).."$ Press Y to buy".."\nHelper toys price: "..math.floor(player.helperToysPrice).."$ Press U to buy".."\nCrypto helper price: "..math.floor(player.cryptohelperPrice).."$ Press I to buy",0,578-20*8)
+    love.graphics.print("Upgrade prices! \nAmount price: "..math.floor(player.amountPrice).."$ Press W to buy\nCooldown price: "..math.floor(player.clickCooldownPrice).."$ Press Q to buy\nHelper price: "..math.floor(player.helperPrice).."$ Press E to buy\nHard working helper price: "..math.floor(player.hardHelperPrice).."$ Press R to buy\nMultiplier price: "..math.floor(player.multiPrice).."$ Press T to buy".."\nQueen price: "..math.floor(player.queenPrice).."$ Press Y to buy".."\nHelper toys price: "..math.floor(player.helperToysPrice).."$ Press U to buy".."\nCrypto helper price: "..math.floor(player.cryptohelperPrice).."$ Press I to buy".."\nHack mainframe price: "..math.floor(player.hackPrice).." Coon coins Press O to buy",0,578-20*9)
     love.graphics.setColor(1,1,1)
 
     if player.moods.mood == "basic" then
@@ -299,6 +305,20 @@ function upgradeCryptoRacoon()
     spawnCryptoHelper(sprite,love.math.random(200,700),love.math.random(0,350))
     player.clicks = player.clicks - player.cryptohelperPrice
     player.cryptohelperPrice = player.cryptohelperPrice * 1.25
+end
+
+function upgradeHack()
+    upgradeSFX:play()
+    uTimer = 0
+    player.amount = player.amount + 20
+    upgradeHelper()
+    upgradeHardHelper()
+    upgradeQueenHelper()
+    player.multi = player.multi + 2
+    player.helperToys = player.helperToys + 3
+    player.cooncoins = player.cooncoins - player.hackPrice
+    player.hackPrice = player.hackPrice * 1.25 + 20 
+    player.hacks = player.hacks + 1
 end
 
 function spawnCryptoHelper(sprite,x,y)
