@@ -311,9 +311,6 @@ function upgradeHack()
     upgradeSFX:play()
     uTimer = 0
     player.amount = player.amount + 20
-    upgradeHelper()
-    upgradeHardHelper()
-    upgradeQueenHelper()
     player.multi = player.multi + 2
     player.helperToys = player.helperToys + 3
     player.cooncoins = player.cooncoins - player.hackPrice
