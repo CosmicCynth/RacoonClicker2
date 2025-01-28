@@ -1,5 +1,3 @@
---MAke stool that helps helpers
-
 local width,height = love.graphics.getDimensions()
 love.math.setRandomSeed(love.timer.getTime())
 font = love.graphics.newFont("fonts/font.ttf",17)
@@ -7,8 +5,10 @@ font = love.graphics.newFont("fonts/font.ttf",17)
 function love.load()
     player = {}
     player.clicks = 0
+    player.cooncoins = 0
     player.amount = 1
-    player.multi = 1
+    player.multi = 1 
+    player.helperToys = 1
 
     player.helpers = {}
     player.helpers.amount = 0
@@ -16,7 +16,11 @@ function love.load()
     player.hardhelpers = {}
     player.hardhelpers.amount = 0
 
-    player.stool = 0 
+    player.queenhelpers = {}
+    player.queenhelpers.amount = 0 
+    
+    player.cryptohelpers = {}
+    player.cryptohelpers.amount = 0
 
 
     player.amountPrice = 5
@@ -24,7 +28,11 @@ function love.load()
     player.helperPrice = 20
     player.hardHelperPrice = 2000
     player.multiPrice  = 125000
-    player.stoolPrice = 1000000
+    player.queenPrice = 1000000
+    player.helperToysPrice = 50000
+    player.cryptohelperPrice = 10000000
+
+
 
     player.moods = {}
     player.moods.mood = "basic" 
@@ -38,7 +46,7 @@ function love.load()
     clickSFX = love.audio.newSource("sounds/clickSFX.wav","static")
     helperPaySFX = love.audio.newSource("sounds/Chaching.wav","static")
     upgradeSFX = love.audio.newSource("sounds/upgradeSFX.wav","static")
-
+    cryptoSFX = love.audio.newSource("sounds/cryptoChahing.wav","static")
 
     --Timers
 
@@ -53,6 +61,12 @@ function love.load()
     --Helper timer
     hTimer = 0
     hMTimer = 30
+
+    qHTimer = 0
+    qHMTimer = 174
+
+    cHTimer = 0
+    cHMTimer = 156
 
     --Mood timer
     mTimer = 0
@@ -90,10 +104,34 @@ function love.update(dt)
     if hTimer >= hMTimer and player.helpers.amount >= 1 then
         hTimer = 0
         helperPaySFX:play()
-        player.clicks = player.clicks + 0.70 * (player.helpers.amount * player.multi * player.amount)
+        player.clicks = player.clicks + 0.70 * (player.helpers.amount * player.multi * player.amount) * player.helperToys
         if player.hardhelpers.amount >= 1 then
-            player.clicks = player.clicks + player.hardhelpers.amount * 17 * player.multi * player.amount
+            player.clicks = player.clicks + player.hardhelpers.amount * 17 * player.multi * player.amount * player.helperToys
         end
+    end
+
+    cHTimer = cHTimer + 1
+    if cHTimer >= cHMTimer then
+        cHTimer = cHMTimer
+    end
+
+    if cHTimer >= cHMTimer and player.cryptohelpers.amount >= 1 then
+        cHTimer = 0
+        cryptoSFX:play()
+        player.cooncoins = player.cooncoins + player.cryptohelpers.amount
+    end
+
+
+    qHTimer = qHTimer + 1
+
+    if qHTimer >= qHMTimer then
+        qHTimer = qHMTimer
+    end
+
+    if qHTimer >= qHMTimer and player.queenhelpers.amount >= 1 then
+        qHTimer = 0
+        helperPaySFX:play()
+        player.clicks = player.clicks + 35 * (player.queenhelpers.amount * player.multi * player.amount) * player.helperToys
     end
 
     if love.keyboard.isDown("w") and uTimer >= uMtimer and player.clicks >= player.amountPrice then
@@ -116,6 +154,18 @@ function love.update(dt)
         upgradeMulti()
     end
 
+    if love.keyboard.isDown("y") and uTimer >= uMtimer and player.clicks >= player.queenPrice then
+        upgradeQueenHelper()
+    end
+
+    if love.keyboard.isDown("u") and uTimer >= uMtimer and player.clicks >= player.helperToysPrice then
+        upgradeHelperToys()
+    end
+
+    if love.keyboard.isDown("i") and uTimer >= uMtimer and player.clicks >= player.cryptohelperPrice then
+        upgradeCryptoRacoon()
+    end
+
 end
 
 function love.draw()
@@ -130,11 +180,19 @@ function love.draw()
         love.graphics.draw(hardhelper.sprite,hardhelper.x,hardhelper.y)
     end
 
+    for i, queenhelper in ipairs(player.queenhelpers) do
+        love.graphics.draw(queenhelper.sprite,queenhelper.x,queenhelper.y)
+    end
+
+    for i, cryptohelper in ipairs(player.cryptohelpers) do
+        love.graphics.draw(cryptohelper.sprite,cryptohelper.x,cryptohelper.y)
+    end
+
     love.graphics.setFont(font)
     love.graphics.setColor(0,0,0)
-    love.graphics.print("Stats! \nMoney: "..math.floor(player.clicks).."$\nAmount level: "..player.amount.."\nCooldown: "..CMTimer.."\nHelper level: "..player.helpers.amount.."\nHard working\nhelper level: "..player.hardhelpers.amount.."\nMultiplier level: "..player.multi)
+    love.graphics.print("Stats! \nMoney: "..math.floor(player.clicks).."$\nCoon Coins: "..math.floor(player.cooncoins).."$\nAmount level: "..player.amount.."\nCooldown: "..CMTimer.."\nHelper level: "..player.helpers.amount.."\nHard working\nhelper level: "..player.hardhelpers.amount.."\nMultiplier level: "..player.multi.."\nQueen level: "..player.queenhelpers.amount.."\nHelper toys level: "..(player.helperToys-1).."\nCrypto helper level: "..player.cryptohelpers.amount)
     
-    love.graphics.print("Upgrade prices! \nAmount price: "..math.floor(player.amountPrice).."$ Press W to buy\nCooldown price: "..math.floor(player.clickCooldownPrice).."$ Press Q to buy\nHelper price: "..math.floor(player.helperPrice).."$ Press E to buy\nHard working helper price: "..math.floor(player.hardHelperPrice).."$ Press R to buy\nMultiplier price: "..math.floor(player.multiPrice).."$ Press T to buy",0,578-20*5)
+    love.graphics.print("Upgrade prices! \nAmount price: "..math.floor(player.amountPrice).."$ Press W to buy\nCooldown price: "..math.floor(player.clickCooldownPrice).."$ Press Q to buy\nHelper price: "..math.floor(player.helperPrice).."$ Press E to buy\nHard working helper price: "..math.floor(player.hardHelperPrice).."$ Press R to buy\nMultiplier price: "..math.floor(player.multiPrice).."$ Press T to buy".."\nQueen price: "..math.floor(player.queenPrice).."$ Press Y to buy".."\nHelper toys price: "..math.floor(player.helperToysPrice).."$ Press U to buy".."\nCrypto helper price: "..math.floor(player.cryptohelperPrice).."$ Press I to buy",0,578-20*8)
     love.graphics.setColor(1,1,1)
 
     if player.moods.mood == "basic" then
@@ -217,9 +275,46 @@ function upgradeMulti()
     player.multiPrice = player.multiPrice * 3
 end
 
-function upgradeStool()
+function upgradeQueenHelper()
     upgradeSFX:play()
     uTimer = 0
+    player.queenhelpers.amount = player.queenhelpers.amount + 1
+    spawnQueenHelper(sprite,love.math.random(200,700), love.math.random(0,350))
+    player.clicks = player.clicks - player.queenPrice
+    player.queenPrice = player.queenPrice * 1.25
+end
+
+function upgradeHelperToys()
+    upgradeSFX:play()
+    uTimer = 0 
+    player.helperToys = player.helperToys + 1
+    player.clicks = player.clicks - player.helperToysPrice
+    player.helperToysPrice = player.helperToysPrice * 1.5
+end
+
+function upgradeCryptoRacoon()
+    upgradeSFX:play()
+    uTimer = 0
+    player.cryptohelpers.amount = player.cryptohelpers.amount + 1
+    spawnCryptoHelper(sprite,love.math.random(200,700),love.math.random(0,350))
+    player.clicks = player.clicks - player.cryptohelperPrice
+    player.cryptohelperPrice = player.cryptohelperPrice * 1.25
+end
+
+function spawnCryptoHelper(sprite,x,y)
+    cryptoHelper = {}
+    cryptoHelper.sprite = love.graphics.newImage("images/cryptoracoon.png")
+    cryptoHelper.x = x
+    cryptoHelper.y = y
+    table.insert(player.cryptohelpers,cryptoHelper)
+end
+
+function spawnQueenHelper(sprite,x,y)
+    queenHelper = {}
+    queenHelper.sprite = love.graphics.newImage("images/queenracoon.png")
+    queenHelper.x = x
+    queenHelper.y = y
+    table.insert(player.queenhelpers,queenHelper)
 end
 
 function spawnHelper(sprite,x,y)
