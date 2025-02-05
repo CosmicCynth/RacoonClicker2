@@ -1,6 +1,11 @@
 local width,height = love.graphics.getDimensions()
 love.math.setRandomSeed(love.timer.getTime())
 font = love.graphics.newFont("fonts/font.ttf",17)
+--Suit
+local input = {text = ""}
+love.graphics.setFont(font)
+
+local suit = require"libaries/suit"
 
 function love.load()
     player = {}
@@ -10,6 +15,7 @@ function love.load()
     player.multi = 1 
     player.helperToys = 1
     player.hacks = 0
+    player.scracoon = 0
 
     player.helpers = {}
     player.helpers.amount = 0
@@ -23,7 +29,6 @@ function love.load()
     player.cryptohelpers = {}
     player.cryptohelpers.amount = 0
 
-
     player.amountPrice = 5
     player.clickCooldownPrice = 300
     player.helperPrice = 20
@@ -33,7 +38,7 @@ function love.load()
     player.helperToysPrice = 50000
     player.cryptohelperPrice = 10000000
     player.hackPrice = 100
-
+    player.scracoonPrice = 999
 
 
     player.moods = {}
@@ -49,6 +54,10 @@ function love.load()
     helperPaySFX = love.audio.newSource("sounds/Chaching.wav","static")
     upgradeSFX = love.audio.newSource("sounds/upgradeSFX.wav","static")
     cryptoSFX = love.audio.newSource("sounds/cryptoChahing.wav","static")
+    saveNloadSFX = love.audio.newSource("sounds/saveNloadSFX.wav","static")
+
+    --Shop
+    shop = "clicks" 
 
     --Timers
 
@@ -69,6 +78,10 @@ function love.load()
 
     cHTimer = 0
     cHMTimer = 156
+
+    --Endgame Timers
+    eGTimer = 0
+    eGMTimer = 200
 
     --Mood timer
     mTimer = 0
@@ -101,6 +114,18 @@ function love.update(dt)
     if mTimer >= mMTimer then
         mTimer = 0
         moodPicker(love.math.random(1,5))
+    end
+
+    eGTimer = eGTimer + 1
+    if eGTimer >= eGMTimer then
+        eGTimer = eGMTimer
+    end
+
+    if eGTimer >= eGMTimer and player.scracoon >= 1 then
+        eGTimer = 0
+        helperPaySFX:play()
+        player.clicks = player.clicks + 25000 * player.multi
+        player.cooncoins = player.cooncoins + 3 + (player.cryptohelpers.amount / 2)
     end
  
     if hTimer >= hMTimer and player.helpers.amount >= 1 then
@@ -172,14 +197,27 @@ function love.update(dt)
         upgradeHack()
     end
 
-    if love.keyboard.isDown("z") and uTimer >= uMtimer then
-        saveData()
+    if love.keyboard.isDown("p") and uTimer >= uMtimer and player.cooncoins >= player.scracoonPrice then
+        upgradeScracoon()
     end
 
-    if love.keyboard.isDown("x") and uTimer >= uMtimer then
-        loadData()
+	if suit.Button("Save", 200,30).hit and uTimer >= uMtimer then
+        saveNloadSFX:play()
+		saveData()
+	end
+
+    if suit.Button("Load", 245,30).hit and uTimer >= uMtimer then
+        saveNloadSFX:play()
+		loadData()
+	end
+
+    if suit.Button("Clicks shop",0,395).hit and uTimer >= uMtimer then
+        shop = "clicks"
     end
 
+    if suit.Button("Coon shop",110,395).hit and uTimer >= uMtimer then
+        shop = "coon"
+    end
 end
 
 function love.draw()
@@ -204,10 +242,16 @@ function love.draw()
 
     love.graphics.setFont(font)
     love.graphics.setColor(0,0,0)
-    love.graphics.print("Stats! \nMoney: "..math.floor(player.clicks).."$\nCoon Coins: "..math.floor(player.cooncoins).."$\nAmount level: "..player.amount.."\nCooldown: "..CMTimer.."\nHelper level: "..player.helpers.amount.."\nHard working\nhelper level: "..player.hardhelpers.amount.."\nMultiplier level: "..player.multi.."\nQueen level: "..player.queenhelpers.amount.."\nHelper toys level: "..(player.helperToys-1).."\nCrypto helper level: "..player.cryptohelpers.amount.."\nHacks on mainframe: "..player.hacks.."\nPress Z to save \nPress X to load")
+    love.graphics.print("Stats! \nMoney: "..math.floor(player.clicks).."$\nCoon Coins: "..math.floor(player.cooncoins).."$\nAmount level: "..player.amount.."\nCooldown: "..CMTimer.."\nHelper level: "..player.helpers.amount.."\nHard working\nhelper level: "..player.hardhelpers.amount.."\nMultiplier level: "..player.multi.."\nQueen level: "..player.queenhelpers.amount.."\nHelper toys level: "..(player.helperToys-1).."\nCrypto helper level: "..player.cryptohelpers.amount.."\nHacks on mainframe: "..player.hacks.."\nScracoon level: "..player.scracoon)
     
-    love.graphics.print("Upgrade prices! \nAmount price: "..math.floor(player.amountPrice).."$ Press W to buy\nCooldown price: "..math.floor(player.clickCooldownPrice).."$ Press Q to buy\nHelper price: "..math.floor(player.helperPrice).."$ Press E to buy\nHard working helper price: "..math.floor(player.hardHelperPrice).."$ Press R to buy\nMultiplier price: "..math.floor(player.multiPrice).."$ Press T to buy".."\nQueen price: "..math.floor(player.queenPrice).."$ Press Y to buy".."\nHelper toys price: "..math.floor(player.helperToysPrice).."$ Press U to buy".."\nCrypto helper price: "..math.floor(player.cryptohelperPrice).."$ Press I to buy".."\nHack mainframe price: "..math.floor(player.hackPrice).." Coon coins Press O to buy",0,578-20*9)
-    love.graphics.setColor(1,1,1)
+    if shop == "clicks" then
+        love.graphics.print("Upgrade prices! \nAmount price: "..math.floor(player.amountPrice).."$ Press W to buy\nCooldown price: "..math.floor(player.clickCooldownPrice).."$ Press Q to buy\nHelper price: "..math.floor(player.helperPrice).."$ Press E to buy\nHard working helper price: "..math.floor(player.hardHelperPrice).."$ Press R to buy\nMultiplier price: "..math.floor(player.multiPrice).."$ Press T to buy".."\nQueen price: "..math.floor(player.queenPrice).."$ Press Y to buy".."\nHelper toys price: "..math.floor(player.helperToysPrice).."$ Press U to buy".."\nCrypto helper price: "..math.floor(player.cryptohelperPrice).."$ Press I to buy",0,578-20*8)
+        love.graphics.setColor(1,1,1)
+    elseif shop == "coon" then
+        love.graphics.print("Upgrade prices!\nHack mainframe price: "..math.floor(player.hackPrice).." Coon coins Press O to buy\nScracoon price: "..player.scracoonPrice.." Coon coins Press P to buy",0,578-20*8)
+        love.graphics.setColor(1,1,1)
+    end
+
 
     if player.moods.mood == "basic" then
         love.graphics.draw(player.moods.basic,width/2,height/2,nil,nil,nil,117,113)
@@ -220,6 +264,8 @@ function love.draw()
     elseif player.moods.mood == "greedy" then
         love.graphics.draw(player.moods.greedy,width/2,height/2,nil,nil,nil,135,124.5)
     end
+
+    suit.draw()
 end
 
 function love.mousepressed(x,y,button)
@@ -326,6 +372,14 @@ function upgradeHack()
     player.hacks = player.hacks + 1
 end
 
+function upgradeScracoon()
+    upgradeSFX:play()
+    uTimer = 0
+    player.scracoon = player.scracoon + 1
+    player.cooncoins = player.cooncoins - player.scracoonPrice
+    player.scracoonPrice = player.scracoonPrice * 1.25
+end
+
 function spawnCryptoHelper(sprite,x,y)
     cryptoHelper = {}
     cryptoHelper.sprite = love.graphics.newImage("images/cryptoracoon.png")
@@ -386,7 +440,6 @@ function saveData()
         hardHelpersNumber = player.hardhelpers.amount,
         queenhelperNumber = player.queenhelpers.amount,
         cryotohelpersNumber = player.cryptohelpers.amount,
-        --price
         amountlevelprice = player.amountPrice,
         helpersnumberprice = player.helperPrice,
         multilevelprice = player.multiPrice,
@@ -394,10 +447,12 @@ function saveData()
         hacksLevelprice = player.hackPrice,
         hardHelpersNumberprice = player.hardHelperPrice,
         queenhelperNumberprice = player.queenPrice,
-        cryptohelpersNumberLevel = player.cryptohelperPrice
+        cryptohelpersNumberLevel = player.cryptohelperPrice,
+        scracoonNumberLevel = player.scracoon,
+        scracoonNumberPrice = player.scracoonPrice
     }
 
-    local jsonString = love.filesystem.write("savegame.txt", love.data.encode("string", "base64", table.concat({data.money, data.coonMoney, data.amountlevel,data.helpersnumber,data.multilevel,data.helperToysLevel,data.hacksLevel,data.hardHelpersNumber,data.queenhelperNumber,data.cryotohelpersNumber,data.amountlevelprice,data.helpersnumberprice,data.multilevelprice,data.helpersToysLevelprice,data.hacksLevelprice,data.hardHelpersNumberprice,data.queenhelperNumberprice,data.cryptohelpersNumberLevel}, ",")))
+    local jsonString = love.filesystem.write("savegame.txt", love.data.encode("string", "base64", table.concat({data.money, data.coonMoney, data.amountlevel,data.helpersnumber,data.multilevel,data.helperToysLevel,data.hacksLevel,data.hardHelpersNumber,data.queenhelperNumber,data.cryotohelpersNumber,data.amountlevelprice,data.helpersnumberprice,data.multilevelprice,data.helpersToysLevelprice,data.hacksLevelprice,data.hardHelpersNumberprice,data.queenhelperNumberprice,data.cryptohelpersNumberLevel,data.scracoonNumberLevel,data.scracoonNumberPrice}, ",")))
 end
 
 function loadData()
@@ -428,12 +483,10 @@ function loadData()
         player.hardHelperPrice = tonumber(dataParts[16]) or 0
         player.queenPrice = tonumber(dataParts[17]) or 0
         player.cryptohelperPrice = tonumber(dataParts[18]) or 0
-        
-
-        print("Game loaded:", player.clicks, player.cooncoins, player.amount)
+        player.scracoon = tonumber(dataParts[19]) or 0
+        player.scracoonPrice = tonumber(dataParts[20]) or 0
         return true
     else
-        print("No save file found.")
         return false
     end
 end
