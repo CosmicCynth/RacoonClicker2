@@ -1,6 +1,7 @@
 local width,height = love.graphics.getDimensions()
 love.math.setRandomSeed(love.timer.getTime())
-font = love.graphics.newFont("fonts/font.ttf",17)
+local font = love.graphics.newFont("fonts/font.ttf",17)
+local titelFont = love.graphics.newFont("fonts/font.ttf",30)
 --Suit
 local input = {text = ""}
 love.graphics.setFont(font)
@@ -8,6 +9,8 @@ love.graphics.setFont(font)
 local suit = require"libaries/suit"
 
 function love.load()
+    scene = "MainMenu"
+
     player = {}
     player.clicks = 0
     player.cooncoins = 0
@@ -94,176 +97,193 @@ function love.load()
 end
 
 function love.update(dt)
-    --Timers
-    cTimer = cTimer + 1 
-    if cTimer >= CMTimer then
-        cTimer = CMTimer
-    end
+    if scene == "game" then
+        --Timers
+        cTimer = cTimer + 1 
+        if cTimer >= CMTimer then
+            cTimer = CMTimer
+        end
 
-    uTimer = uTimer + 1 
-    if uTimer >= uMtimer then
-        uTimer = uMtimer
-    end
+        uTimer = uTimer + 1 
+        if uTimer >= uMtimer then
+            uTimer = uMtimer
+        end
 
-    hTimer = hTimer + 1
-    if hTimer >= hMTimer then
-        hTimer = hMTimer
-    end
+        hTimer = hTimer + 1
+        if hTimer >= hMTimer then
+            hTimer = hMTimer
+        end
 
-    mTimer = mTimer + 1
-    if mTimer >= mMTimer then
-        mTimer = 0
-        moodPicker(love.math.random(1,5))
-    end
+        mTimer = mTimer + 1
+        if mTimer >= mMTimer then
+            mTimer = 0
+            moodPicker(love.math.random(1,5))
+        end
 
-    eGTimer = eGTimer + 1
-    if eGTimer >= eGMTimer then
-        eGTimer = eGMTimer
-    end
+        eGTimer = eGTimer + 1
+        if eGTimer >= eGMTimer then
+            eGTimer = eGMTimer
+        end
 
-    if eGTimer >= eGMTimer and player.scracoon >= 1 then
-        eGTimer = 0
-        helperPaySFX:play()
-        player.clicks = player.clicks + 25000 * player.multi
-        player.cooncoins = player.cooncoins + 3 + (player.cryptohelpers.amount / 2)
-    end
+        if eGTimer >= eGMTimer and player.scracoon >= 1 then
+            eGTimer = 0
+            helperPaySFX:play()
+            player.clicks = player.clicks + 25000 * player.multi
+            player.cooncoins = player.cooncoins + 3 + (player.cryptohelpers.amount / 2)
+        end
+        
     
- 
-    if hTimer >= hMTimer and player.helpers.amount >= 1 then
-        hTimer = 0
-        helperPaySFX:play()
-        player.clicks = player.clicks + 0.70 * (player.helpers.amount * player.multi * player.amount) * player.helperToys
-        if player.hardhelpers.amount >= 1 then
-            player.clicks = player.clicks + player.hardhelpers.amount * 17 * player.multi * player.amount * player.helperToys
+        if hTimer >= hMTimer and player.helpers.amount >= 1 then
+            hTimer = 0
+            helperPaySFX:play()
+            player.clicks = player.clicks + 0.70 * (player.helpers.amount * player.multi * player.amount) * player.helperToys
+            if player.hardhelpers.amount >= 1 then
+                player.clicks = player.clicks + player.hardhelpers.amount * 17 * player.multi * player.amount * player.helperToys
+            end
+        end
+
+        cHTimer = cHTimer + 1
+        if cHTimer >= cHMTimer then
+            cHTimer = cHMTimer
+        end
+
+        if cHTimer >= cHMTimer and player.cryptohelpers.amount >= 1 then
+            cHTimer = 0
+            cryptoSFX:play()
+            player.cooncoins = player.cooncoins + player.cryptohelpers.amount
+        end
+
+
+        qHTimer = qHTimer + 1
+
+        if qHTimer >= qHMTimer then
+            qHTimer = qHMTimer
+        end
+
+        if qHTimer >= qHMTimer and player.queenhelpers.amount >= 1 then
+            qHTimer = 0
+            helperPaySFX:play()
+            player.clicks = player.clicks + 35 * (player.queenhelpers.amount * player.multi * player.amount) * player.helperToys
+        end
+
+        if love.keyboard.isDown("w") and uTimer >= uMtimer and player.clicks >= player.amountPrice then
+            upgradeAmount()
+        end
+
+        if love.keyboard.isDown("q") and uTimer >= uMtimer and player.clicks >= player.clickCooldownPrice then
+            upgradeCTimer()
+        end
+
+        if love.keyboard.isDown("e") and uTimer >= uMtimer and player.clicks >= player.helperPrice then
+            upgradeHelper()
+        end
+
+        if love.keyboard.isDown("r") and uTimer >= uMtimer and player.clicks >= player.hardHelperPrice then
+            upgradeHardHelper()
+        end
+
+        if love.keyboard.isDown("t") and uTimer >= uMtimer and player.clicks >= player.multiPrice then
+            upgradeMulti()
+        end
+
+        if love.keyboard.isDown("y") and uTimer >= uMtimer and player.clicks >= player.queenPrice then
+            upgradeQueenHelper()
+        end
+
+        if love.keyboard.isDown("u") and uTimer >= uMtimer and player.clicks >= player.helperToysPrice then
+            upgradeHelperToys()
+        end
+
+        if love.keyboard.isDown("i") and uTimer >= uMtimer and player.clicks >= player.cryptohelperPrice then
+            upgradeCryptoRacoon()
+        end
+
+        if love.keyboard.isDown("o") and uTimer >= uMtimer and player.cooncoins >= player.hackPrice then
+            upgradeHack()
+        end
+
+        if love.keyboard.isDown("p") and uTimer >= uMtimer and player.cooncoins >= player.scracoonPrice then
+            upgradeScracoon()
+        end
+
+        if suit.Button("Save", 200,30).hit and uTimer >= uMtimer then
+            saveNloadSFX:play()
+            saveData()
+        end
+
+        if suit.Button("Load", 245,30).hit and uTimer >= uMtimer then
+            saveNloadSFX:play()
+            loadData()
+        end
+
+        if suit.Button("Clicks shop",0,395).hit and uTimer >= uMtimer then
+            shop = "clicks"
+        end
+
+        if suit.Button("Coon shop",110,395).hit and uTimer >= uMtimer then
+            shop = "coon"
         end
     end
 
-    cHTimer = cHTimer + 1
-    if cHTimer >= cHMTimer then
-        cHTimer = cHMTimer
-    end
-
-    if cHTimer >= cHMTimer and player.cryptohelpers.amount >= 1 then
-        cHTimer = 0
-        cryptoSFX:play()
-        player.cooncoins = player.cooncoins + player.cryptohelpers.amount
-    end
-
-
-    qHTimer = qHTimer + 1
-
-    if qHTimer >= qHMTimer then
-        qHTimer = qHMTimer
-    end
-
-    if qHTimer >= qHMTimer and player.queenhelpers.amount >= 1 then
-        qHTimer = 0
-        helperPaySFX:play()
-        player.clicks = player.clicks + 35 * (player.queenhelpers.amount * player.multi * player.amount) * player.helperToys
-    end
-
-    if love.keyboard.isDown("w") and uTimer >= uMtimer and player.clicks >= player.amountPrice then
-        upgradeAmount()
-    end
-
-    if love.keyboard.isDown("q") and uTimer >= uMtimer and player.clicks >= player.clickCooldownPrice then
-        upgradeCTimer()
-    end
-
-    if love.keyboard.isDown("e") and uTimer >= uMtimer and player.clicks >= player.helperPrice then
-        upgradeHelper()
-    end
-
-    if love.keyboard.isDown("r") and uTimer >= uMtimer and player.clicks >= player.hardHelperPrice then
-        upgradeHardHelper()
-    end
-
-    if love.keyboard.isDown("t") and uTimer >= uMtimer and player.clicks >= player.multiPrice then
-        upgradeMulti()
-    end
-
-    if love.keyboard.isDown("y") and uTimer >= uMtimer and player.clicks >= player.queenPrice then
-        upgradeQueenHelper()
-    end
-
-    if love.keyboard.isDown("u") and uTimer >= uMtimer and player.clicks >= player.helperToysPrice then
-        upgradeHelperToys()
-    end
-
-    if love.keyboard.isDown("i") and uTimer >= uMtimer and player.clicks >= player.cryptohelperPrice then
-        upgradeCryptoRacoon()
-    end
-
-    if love.keyboard.isDown("o") and uTimer >= uMtimer and player.cooncoins >= player.hackPrice then
-        upgradeHack()
-    end
-
-    if love.keyboard.isDown("p") and uTimer >= uMtimer and player.cooncoins >= player.scracoonPrice then
-        upgradeScracoon()
-    end
-
-	if suit.Button("Save", 200,30).hit and uTimer >= uMtimer then
-        saveNloadSFX:play()
-		saveData()
-	end
-
-    if suit.Button("Load", 245,30).hit and uTimer >= uMtimer then
-        saveNloadSFX:play()
-		loadData()
-	end
-
-    if suit.Button("Clicks shop",0,395).hit and uTimer >= uMtimer then
-        shop = "clicks"
-    end
-
-    if suit.Button("Coon shop",110,395).hit and uTimer >= uMtimer then
-        shop = "coon"
+    if scene == "MainMenu" then
+        if suit.Button("Play Racoon clicker 2!",width/2-110,height-500).hit then
+            scene = "game"
+        end
     end
 end
 
 function love.draw()
-    love.graphics.draw(background)
+    if scene == "game" then
+        love.graphics.setFont(font)
+        love.graphics.draw(background)
 
- 
-    for i, helper in ipairs(player.helpers) do
-        love.graphics.draw(helper.sprite,helper.x,helper.y)
-    end
-
-    for i, hardhelper in ipairs(player.hardhelpers) do
-        love.graphics.draw(hardhelper.sprite,hardhelper.x,hardhelper.y)
-    end
-
-    for i, queenhelper in ipairs(player.queenhelpers) do
-        love.graphics.draw(queenhelper.sprite,queenhelper.x,queenhelper.y)
-    end
-
-    for i, cryptohelper in ipairs(player.cryptohelpers) do
-        love.graphics.draw(cryptohelper.sprite,cryptohelper.x,cryptohelper.y)
-    end
-
-    love.graphics.setFont(font)
-    love.graphics.setColor(0,0,0)
-    love.graphics.print("Stats! \nMoney: "..formatNumber(player.clicks).."$\nCoon Coins: "..formatNumber(player.cooncoins).."$\nAmount level: "..player.amount.."\nCooldown: "..CMTimer.."\nHelper level: "..player.helpers.amount.."\nHard working\nhelper level: "..player.hardhelpers.amount.."\nMultiplier level: "..player.multi.."\nQueen level: "..player.queenhelpers.amount.."\nHelper toys level: "..(player.helperToys-1).."\nCrypto helper level: "..player.cryptohelpers.amount.."\nHacks on mainframe: "..player.hacks.."\nScracoon level: "..player.scracoon)
     
-    if shop == "clicks" then
-        love.graphics.print("Upgrade prices! \nAmount price: "..formatNumber(player.amountPrice).."$ Press W to buy\nCooldown price: "..formatNumber(player.clickCooldownPrice).."$ Press Q to buy\nHelper price: "..formatNumber(player.helperPrice).."$ Press E to buy\nHard working helper price: "..formatNumber(player.hardHelperPrice).."$ Press R to buy\nMultiplier price: "..formatNumber(player.multiPrice).."$ Press T to buy".."\nQueen price: "..formatNumber(player.queenPrice).."$ Press Y to buy".."\nHelper toys price: "..formatNumber(player.helperToysPrice).."$ Press U to buy".."\nCrypto helper price: "..formatNumber(player.cryptohelperPrice).."$ Press I to buy",0,578-20*8)
-        love.graphics.setColor(1,1,1)
-    elseif shop == "coon" then
-        love.graphics.print("Upgrade prices!\nHack mainframe price: "..formatNumber(player.hackPrice).." Coon coins Press O to buy\nScracoon price: "..formatNumber(player.scracoonPrice).." Coon coins Press P to buy",0,578-20*8)
-        love.graphics.setColor(1,1,1)
+        for i, helper in ipairs(player.helpers) do
+            love.graphics.draw(helper.sprite,helper.x,helper.y)
+        end
+
+        for i, hardhelper in ipairs(player.hardhelpers) do
+            love.graphics.draw(hardhelper.sprite,hardhelper.x,hardhelper.y)
+        end
+
+        for i, queenhelper in ipairs(player.queenhelpers) do
+            love.graphics.draw(queenhelper.sprite,queenhelper.x,queenhelper.y)
+        end
+
+        for i, cryptohelper in ipairs(player.cryptohelpers) do
+            love.graphics.draw(cryptohelper.sprite,cryptohelper.x,cryptohelper.y)
+        end
+
+        love.graphics.setFont(font)
+        love.graphics.setColor(0,0,0)
+        love.graphics.print("Stats! \nMoney: "..formatNumber(player.clicks).."$\nCoon Coins: "..formatNumber(player.cooncoins).."$\nAmount level: "..player.amount.."\nCooldown: "..CMTimer.."\nHelper level: "..player.helpers.amount.."\nHard working\nhelper level: "..player.hardhelpers.amount.."\nMultiplier level: "..player.multi.."\nQueen level: "..player.queenhelpers.amount.."\nHelper toys level: "..(player.helperToys-1).."\nCrypto helper level: "..player.cryptohelpers.amount.."\nHacks on mainframe: "..player.hacks.."\nScracoon level: "..player.scracoon)
+        
+        if shop == "clicks" then
+            love.graphics.print("Upgrade prices! \nAmount price: "..formatNumber(player.amountPrice).."$ Press W to buy\nCooldown price: "..formatNumber(player.clickCooldownPrice).."$ Press Q to buy\nHelper price: "..formatNumber(player.helperPrice).."$ Press E to buy\nHard working helper price: "..formatNumber(player.hardHelperPrice).."$ Press R to buy\nMultiplier price: "..formatNumber(player.multiPrice).."$ Press T to buy".."\nQueen price: "..formatNumber(player.queenPrice).."$ Press Y to buy".."\nHelper toys price: "..formatNumber(player.helperToysPrice).."$ Press U to buy".."\nCrypto helper price: "..formatNumber(player.cryptohelperPrice).."$ Press I to buy",0,578-20*8)
+            love.graphics.setColor(1,1,1)
+        elseif shop == "coon" then
+            love.graphics.print("Upgrade prices!\nHack mainframe price: "..formatNumber(player.hackPrice).." Coon coins Press O to buy\nScracoon price: "..formatNumber(player.scracoonPrice).." Coon coins Press P to buy",0,578-20*8)
+            love.graphics.setColor(1,1,1)
+        end
+
+
+        if player.moods.mood == "basic" then
+            love.graphics.draw(player.moods.basic,width/2,height/2,nil,nil,nil,117,113)
+        elseif player.moods.mood == "cute" then
+            love.graphics.draw(player.moods.cute,width/2,height/2,nil,nil,nil,112.5,112.5)
+        elseif player.moods.mood == "cursed" then
+            love.graphics.draw(player.moods.cursed,width/2,height/2,nil,nil,nil,91,135)
+        elseif player.moods.mood == "rich" then
+            love.graphics.draw(player.moods.rich,width/2,height/2,nil,nil,nil,151,161)
+        elseif player.moods.mood == "greedy" then
+            love.graphics.draw(player.moods.greedy,width/2,height/2,nil,nil,nil,135,124.5)
+        end
     end
 
-
-    if player.moods.mood == "basic" then
-        love.graphics.draw(player.moods.basic,width/2,height/2,nil,nil,nil,117,113)
-    elseif player.moods.mood == "cute" then
-        love.graphics.draw(player.moods.cute,width/2,height/2,nil,nil,nil,112.5,112.5)
-    elseif player.moods.mood == "cursed" then
-        love.graphics.draw(player.moods.cursed,width/2,height/2,nil,nil,nil,91,135)
-    elseif player.moods.mood == "rich" then
-        love.graphics.draw(player.moods.rich,width/2,height/2,nil,nil,nil,151,161)
-    elseif player.moods.mood == "greedy" then
-        love.graphics.draw(player.moods.greedy,width/2,height/2,nil,nil,nil,135,124.5)
+    if scene == "MainMenu" then
+        love.graphics.setFont(titelFont)
+        love.graphics.print("RACOON CLICKER 2!",width/2-160,50)
+        love.graphics.setFont(font)
     end
 
     suit.draw()
