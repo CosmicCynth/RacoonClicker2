@@ -127,6 +127,7 @@ function love.update(dt)
         player.clicks = player.clicks + 25000 * player.multi
         player.cooncoins = player.cooncoins + 3 + (player.cryptohelpers.amount / 2)
     end
+    
  
     if hTimer >= hMTimer and player.helpers.amount >= 1 then
         hTimer = 0
@@ -242,13 +243,13 @@ function love.draw()
 
     love.graphics.setFont(font)
     love.graphics.setColor(0,0,0)
-    love.graphics.print("Stats! \nMoney: "..math.floor(player.clicks).."$\nCoon Coins: "..math.floor(player.cooncoins).."$\nAmount level: "..player.amount.."\nCooldown: "..CMTimer.."\nHelper level: "..player.helpers.amount.."\nHard working\nhelper level: "..player.hardhelpers.amount.."\nMultiplier level: "..player.multi.."\nQueen level: "..player.queenhelpers.amount.."\nHelper toys level: "..(player.helperToys-1).."\nCrypto helper level: "..player.cryptohelpers.amount.."\nHacks on mainframe: "..player.hacks.."\nScracoon level: "..player.scracoon)
+    love.graphics.print("Stats! \nMoney: "..formatNumber(player.clicks).."$\nCoon Coins: "..formatNumber(player.cooncoins).."$\nAmount level: "..player.amount.."\nCooldown: "..CMTimer.."\nHelper level: "..player.helpers.amount.."\nHard working\nhelper level: "..player.hardhelpers.amount.."\nMultiplier level: "..player.multi.."\nQueen level: "..player.queenhelpers.amount.."\nHelper toys level: "..(player.helperToys-1).."\nCrypto helper level: "..player.cryptohelpers.amount.."\nHacks on mainframe: "..player.hacks.."\nScracoon level: "..player.scracoon)
     
     if shop == "clicks" then
-        love.graphics.print("Upgrade prices! \nAmount price: "..math.floor(player.amountPrice).."$ Press W to buy\nCooldown price: "..math.floor(player.clickCooldownPrice).."$ Press Q to buy\nHelper price: "..math.floor(player.helperPrice).."$ Press E to buy\nHard working helper price: "..math.floor(player.hardHelperPrice).."$ Press R to buy\nMultiplier price: "..math.floor(player.multiPrice).."$ Press T to buy".."\nQueen price: "..math.floor(player.queenPrice).."$ Press Y to buy".."\nHelper toys price: "..math.floor(player.helperToysPrice).."$ Press U to buy".."\nCrypto helper price: "..math.floor(player.cryptohelperPrice).."$ Press I to buy",0,578-20*8)
+        love.graphics.print("Upgrade prices! \nAmount price: "..formatNumber(player.amountPrice).."$ Press W to buy\nCooldown price: "..formatNumber(player.clickCooldownPrice).."$ Press Q to buy\nHelper price: "..formatNumber(player.helperPrice).."$ Press E to buy\nHard working helper price: "..formatNumber(player.hardHelperPrice).."$ Press R to buy\nMultiplier price: "..formatNumber(player.multiPrice).."$ Press T to buy".."\nQueen price: "..formatNumber(player.queenPrice).."$ Press Y to buy".."\nHelper toys price: "..formatNumber(player.helperToysPrice).."$ Press U to buy".."\nCrypto helper price: "..formatNumber(player.cryptohelperPrice).."$ Press I to buy",0,578-20*8)
         love.graphics.setColor(1,1,1)
     elseif shop == "coon" then
-        love.graphics.print("Upgrade prices!\nHack mainframe price: "..math.floor(player.hackPrice).." Coon coins Press O to buy\nScracoon price: "..player.scracoonPrice.." Coon coins Press P to buy",0,578-20*8)
+        love.graphics.print("Upgrade prices!\nHack mainframe price: "..formatNumber(player.hackPrice).." Coon coins Press O to buy\nScracoon price: "..formatNumber(player.scracoonPrice).." Coon coins Press P to buy",0,578-20*8)
         love.graphics.setColor(1,1,1)
     end
 
@@ -488,5 +489,17 @@ function loadData()
         return true
     else
         return false
+    end
+end
+
+function formatNumber(n)
+    if n >= 1e9 then
+        return string.format("%.1fB", n / 1e9)  -- Billions
+    elseif n >= 1e6 then
+        return string.format("%.1fM", n / 1e6)  -- Millions
+    elseif n >= 1e3 then
+        return string.format("%.1fK", n / 1e3)  -- Thousands
+    else
+        return tostring(n)  -- No formatting needed
     end
 end
