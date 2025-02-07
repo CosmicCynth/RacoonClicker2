@@ -3,7 +3,7 @@ love.math.setRandomSeed(love.timer.getTime())
 local font = love.graphics.newFont("fonts/font.ttf",17)
 local titelFont = love.graphics.newFont("fonts/font.ttf",30)
 --Suit
-local input = {text = ""}
+local slider = {value = 1, min = 0, max = 1}
 love.graphics.setFont(font)
 
 local suit = require"libaries/suit"
@@ -59,8 +59,8 @@ function love.load()
     cryptoSFX = love.audio.newSource("sounds/cryptoChahing.wav","static")
     saveNloadSFX = love.audio.newSource("sounds/saveNloadSFX.wav","static")
 
-    --Shop
-    shop = "clicks" 
+    --Shop & misc
+    shop = "clicks"
 
     --Timers
 
@@ -94,9 +94,32 @@ function love.load()
     --Background
     background = love.graphics.newImage("images/background.png")
 
+    sTimer = 0
+    sMTimer = 60
+
 end
 
 function love.update(dt)
+    --Scene timer
+    sTimer = sTimer + 1
+    if sTimer >= sMTimer then
+        sTimer = sMTimer
+    end
+    
+    if love.keyboard.isDown("escape") and sTimer >= sMTimer and scene == "game" then
+        sTimer = 0
+        scene = "MainMenu"
+    end
+
+    if love.keyboard.isDown("escape") and sTimer >= sMTimer and scene == "MainMenu" then
+        love.event.quit()
+    end
+
+    if love.keyboard.isDown("escape") and sTimer >= sMTimer and scene == "settings" then
+        sTimer = 0
+        scene = "MainMenu"
+    end
+
     if scene == "game" then
         --Timers
         cTimer = cTimer + 1 
@@ -223,13 +246,24 @@ function love.update(dt)
         if suit.Button("Coon shop",110,395).hit and uTimer >= uMtimer then
             shop = "coon"
         end
+
     end
 
     if scene == "MainMenu" then
         if suit.Button("Play Racoon clicker 2!",width/2-110,height-500).hit then
             scene = "game"
         end
+
+        if suit.Button("Settings",width/2-55,height-460).hit then
+            scene = "settings"
+        end
     end
+
+    if scene == "settings" then
+        suit.Slider(slider, 100,100,160, 20)
+    end
+
+    love.audio.setVolume(slider.value)
 end
 
 function love.draw()
@@ -284,29 +318,37 @@ function love.draw()
         love.graphics.setFont(titelFont)
         love.graphics.print("RACOON CLICKER 2!",width/2-160,50)
         love.graphics.setFont(font)
+        love.graphics.print("Made by CosmicCynth",width/2-117,height-32)
+    end
+
+    if scene == "settings" then
+        love.graphics.print("Audio level",135,80)
+        love.graphics.print(slider.value, 270,100)
     end
 
     suit.draw()
 end
 
 function love.mousepressed(x,y,button)
-    if button == 1 and cTimer >= CMTimer then
-        clickSFX:play()
-        if player.moods.mood == "basic" then
-            player.clicks = player.clicks + player.amount * player.multi 
-            cTimer = 0
-        elseif player.moods.mood == "cute" then
-            player.clicks = player.clicks + player.amount * player.multi * 1.222
-            cTimer = 0
-        elseif player.moods.mood == "cursed" then
-            player.clicks = player.clicks + player.amount * 2
-            cTimer = 0
-        elseif player.moods.mood == "rich" then
-            player.clicks = player.clicks + player.amount * player.multi * 1.75 + 1.5
-            cTimer = 0
-        elseif player.moods.mood == "greedy" then
-            player.clicks = player.clicks + player.amount * player.multi * 0.85
-            cTimer = 0
+    if scene == "game" then
+        if button == 1 and cTimer >= CMTimer then
+            clickSFX:play()
+            if player.moods.mood == "basic" then
+                player.clicks = player.clicks + player.amount * player.multi 
+                cTimer = 0
+            elseif player.moods.mood == "cute" then
+                player.clicks = player.clicks + player.amount * player.multi * 1.222
+                cTimer = 0
+            elseif player.moods.mood == "cursed" then
+                player.clicks = player.clicks + player.amount * 2
+                cTimer = 0
+            elseif player.moods.mood == "rich" then
+                player.clicks = player.clicks + player.amount * player.multi * 1.75 + 1.5
+                cTimer = 0
+            elseif player.moods.mood == "greedy" then
+                player.clicks = player.clicks + player.amount * player.multi * 0.85
+                cTimer = 0
+            end
         end
     end
 end 
@@ -470,10 +512,11 @@ function saveData()
         queenhelperNumberprice = player.queenPrice,
         cryptohelpersNumberLevel = player.cryptohelperPrice,
         scracoonNumberLevel = player.scracoon,
-        scracoonNumberPrice = player.scracoonPrice
+        scracoonNumberPrice = player.scracoonPrice,
+        audiolevel = slider.value
     }
 
-    local jsonString = love.filesystem.write("savegame.txt", love.data.encode("string", "base64", table.concat({data.money, data.coonMoney, data.amountlevel,data.helpersnumber,data.multilevel,data.helperToysLevel,data.hacksLevel,data.hardHelpersNumber,data.queenhelperNumber,data.cryotohelpersNumber,data.amountlevelprice,data.helpersnumberprice,data.multilevelprice,data.helpersToysLevelprice,data.hacksLevelprice,data.hardHelpersNumberprice,data.queenhelperNumberprice,data.cryptohelpersNumberLevel,data.scracoonNumberLevel,data.scracoonNumberPrice}, ",")))
+    local jsonString = love.filesystem.write("savegame.txt", love.data.encode("string", "base64", table.concat({data.money, data.coonMoney, data.amountlevel,data.helpersnumber,data.multilevel,data.helperToysLevel,data.hacksLevel,data.hardHelpersNumber,data.queenhelperNumber,data.cryotohelpersNumber,data.amountlevelprice,data.helpersnumberprice,data.multilevelprice,data.helpersToysLevelprice,data.hacksLevelprice,data.hardHelpersNumberprice,data.queenhelperNumberprice,data.cryptohelpersNumberLevel,data.scracoonNumberLevel,data.scracoonNumberPrice,data.audiolevel}, ",")))
 end
 
 function loadData()
@@ -506,6 +549,7 @@ function loadData()
         player.cryptohelperPrice = tonumber(dataParts[18]) or 0
         player.scracoon = tonumber(dataParts[19]) or 0
         player.scracoonPrice = tonumber(dataParts[20]) or 0
+        slider.value = tonumber(dataParts[21]) or 0
         return true
     else
         return false
@@ -520,6 +564,6 @@ function formatNumber(n)
     elseif n >= 1e3 then
         return string.format("%.1fK", n / 1e3)  -- Thousands
     else
-        return tostring(n)  -- No formatting needed
+        return tostring(math.floor(n))  -- No formatting needed
     end
 end
