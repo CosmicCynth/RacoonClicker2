@@ -4,6 +4,7 @@ local font = love.graphics.newFont("fonts/font.ttf",17)
 local titelFont = love.graphics.newFont("fonts/font.ttf",30)
 --Suit
 local slider = {value = 1, min = 0, max = 1}
+local checkbox = {checked = false, text = "Hide Helpers?"}
 love.graphics.setFont(font)
 
 local suit = require"libaries/suit"
@@ -93,6 +94,7 @@ function love.load()
 
     --Background
     background = love.graphics.newImage("images/background.png")
+    sBackground = love.graphics.newImage("images/Settingsbackground.png")
 
     sTimer = 0
     sMTimer = 60
@@ -261,6 +263,7 @@ function love.update(dt)
 
     if scene == "settings" then
         suit.Slider(slider, 100,100,160, 20)
+        suit.Checkbox(checkbox,255,175,32,32)
     end
 
     love.audio.setVolume(slider.value)
@@ -271,21 +274,22 @@ function love.draw()
         love.graphics.setFont(font)
         love.graphics.draw(background)
 
-    
-        for i, helper in ipairs(player.helpers) do
-            love.graphics.draw(helper.sprite,helper.x,helper.y)
-        end
+        if checkbox.checked == false then
+            for i, helper in ipairs(player.helpers) do
+                love.graphics.draw(helper.sprite,helper.x,helper.y)
+            end
 
-        for i, hardhelper in ipairs(player.hardhelpers) do
-            love.graphics.draw(hardhelper.sprite,hardhelper.x,hardhelper.y)
-        end
+            for i, hardhelper in ipairs(player.hardhelpers) do
+                love.graphics.draw(hardhelper.sprite,hardhelper.x,hardhelper.y)
+            end
 
-        for i, queenhelper in ipairs(player.queenhelpers) do
-            love.graphics.draw(queenhelper.sprite,queenhelper.x,queenhelper.y)
-        end
+            for i, queenhelper in ipairs(player.queenhelpers) do
+                love.graphics.draw(queenhelper.sprite,queenhelper.x,queenhelper.y)
+            end
 
-        for i, cryptohelper in ipairs(player.cryptohelpers) do
-            love.graphics.draw(cryptohelper.sprite,cryptohelper.x,cryptohelper.y)
+            for i, cryptohelper in ipairs(player.cryptohelpers) do
+                love.graphics.draw(cryptohelper.sprite,cryptohelper.x,cryptohelper.y)
+            end
         end
 
         love.graphics.setFont(font)
@@ -322,8 +326,10 @@ function love.draw()
     end
 
     if scene == "settings" then
+        love.graphics.draw(sBackground)
         love.graphics.print("Audio level",135,80)
         love.graphics.print(slider.value, 270,100)
+        love.graphics.print("Hide Helpers?",100,180)
     end
 
     suit.draw()
