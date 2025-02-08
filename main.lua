@@ -47,7 +47,7 @@ function love.load()
 
     player.plushePrice = {}
     player.plushePrice.moneyPrice = 10000000000
-    player.plushePrice.coonPrice = 25000
+    player.plushePrice.coonPrice = 15000
 
 
     player.moods = {}
@@ -342,6 +342,7 @@ function love.draw()
         love.graphics.print("RACOON CLICKER 2!",width/2-160,50)
         love.graphics.setFont(font)
         love.graphics.print("Made by CosmicCynth",width/2-117,height-32)
+        love.graphics.print("<-- New player? Check the settings out!",width/2+25,height-460)
     end
 
     if scene == "settings" then
@@ -349,7 +350,7 @@ function love.draw()
         love.graphics.print("Audio level",135,80)
         love.graphics.print(slider.value, 270,100)
         love.graphics.print("Hide Helpers?",100,180)
-        love.graphics.print("Controls!\nTo buy stuff read the upgrade prices!\nTo save hold either lshift, tab or lctrl \ndown and the buttons appear", 300,20)
+        love.graphics.print("Controls!\n-To buy stuff read the upgrade prices!\n-To save hold either lshift, tab or lctrl \ndown and the buttons appear\n-Press esc to go back in menus or quit game\n Note worthy comment this game\n dosent have auto save so save before quitting\n and load when needed", 400,20)
     end
 
     suit.draw()
