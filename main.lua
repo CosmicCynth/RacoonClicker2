@@ -13,8 +13,8 @@ function love.load()
     scene = "MainMenu"
 
     player = {}
-    player.clicks = 0
-    player.cooncoins = 0
+    player.clicks = 1000000
+    player.cooncoins = 12500
     player.amount = 1
     player.multi = 1 
     player.helperToys = 1
@@ -34,6 +34,9 @@ function love.load()
     player.cryptohelpers = {}
     player.cryptohelpers.amount = 0
 
+    player.racoonhelpers = {}
+    player.racoonhelpers.amount = 0
+
     player.amountPrice = 5
     player.clickCooldownPrice = 300
     player.helperPrice = 20
@@ -48,6 +51,8 @@ function love.load()
     player.plushePrice = {}
     player.plushePrice.moneyPrice = 10000000000
     player.plushePrice.coonPrice = 15000
+
+    player.servantPrice = 12500
 
 
     player.moods = {}
@@ -197,6 +202,10 @@ function love.update(dt)
             qHTimer = 0
             helperPaySFX:play()
             player.clicks = player.clicks + 35 * (player.queenhelpers.amount * player.multi * player.amount) * player.helperToys
+            if player.racoonhelpers.amount >= 1 then
+                player.cooncoins = player.cooncoins + (17 * player.queenhelpers.amount)
+                player.clicks = player.clicks + 66666 * player.multi
+            end
         end
 
         if love.keyboard.isDown("w") and uTimer >= uMtimer and player.clicks >= player.amountPrice then
@@ -241,6 +250,10 @@ function love.update(dt)
 
         if love.keyboard.isDown("a") and uTimer >= uMtimer and player.plushie == 0 and player.clicks >= player.plushePrice.moneyPrice and player.cooncoins >= player.plushePrice.coonPrice then
             upgradePlushie()
+        end
+
+        if love.keyboard.isDown("s") and uTimer >= uMtimer and player.cooncoins >= player.servantPrice then
+            upgradeServant()
         end
 
         if love.keyboard.isDown("lctrl") or love.keyboard.isDown("lshift") or love.keyboard.isDown("tab") then
@@ -304,17 +317,22 @@ function love.draw()
             for i, cryptohelper in ipairs(player.cryptohelpers) do
                 love.graphics.draw(cryptohelper.sprite,cryptohelper.x,cryptohelper.y)
             end
+
+            for i, servant in ipairs(player.racoonhelpers) do
+                love.graphics.draw(servant.sprite,servant.x,servant.y)
+            end
+
         end
 
         love.graphics.setFont(font)
         love.graphics.setColor(0,0,0)
-        love.graphics.print("Stats! \nMoney: "..formatNumber(player.clicks).."$\nCoon Coins: "..formatNumber(player.cooncoins).."$\nAmount level: "..player.amount.."\nCooldown: "..CMTimer.."\nHelper level: "..player.helpers.amount.."\nHard working\nhelper level: "..player.hardhelpers.amount.."\nMultiplier level: "..player.multi.."\nQueen level: "..player.queenhelpers.amount.."\nHelper toys level: "..(player.helperToys-1).."\nCrypto helper level: "..player.cryptohelpers.amount.."\nHacks on mainframe: "..player.hacks.."\nScracoon level: "..player.scracoon.."\nPlushie level: "..player.plushie)
+        love.graphics.print("Stats! \nMoney: "..formatNumber(player.clicks).."$\nCoon Coins: "..formatNumber(player.cooncoins).."$\nAmount level: "..player.amount.."\nCooldown: "..CMTimer.."\nHelper level: "..player.helpers.amount.."\nHard working\nhelper level: "..player.hardhelpers.amount.."\nMultiplier level: "..player.multi.."\nQueen level: "..player.queenhelpers.amount.."\nHelper toys level: "..(player.helperToys-1).."\nCrypto helper level: "..player.cryptohelpers.amount.."\nHacks on mainframe: "..player.hacks.."\nScracoon level: "..player.scracoon.."\nPlushie level: "..player.plushie.."\nServant level:"..player.racoonhelpers.amount)
         
         if shop == "clicks" then
             love.graphics.print("Upgrade prices! \nAmount price: "..formatNumber(player.amountPrice).."$ Press W to buy\nCooldown price: "..formatNumber(player.clickCooldownPrice).."$ Press Q to buy\nHelper price: "..formatNumber(player.helperPrice).."$ Press E to buy\nHard working helper price: "..formatNumber(player.hardHelperPrice).."$ Press R to buy\nMultiplier price: "..formatNumber(player.multiPrice).."$ Press T to buy".."\nQueen price: "..formatNumber(player.queenPrice).."$ Press Y to buy".."\nHelper toys price: "..formatNumber(player.helperToysPrice).."$ Press U to buy".."\nCrypto helper price: "..formatNumber(player.cryptohelperPrice).."$ Press I to buy",0,578-20*8)
             love.graphics.setColor(1,1,1)
         elseif shop == "coon" then
-            love.graphics.print("Upgrade prices!\nHack mainframe price: "..formatNumber(player.hackPrice).." Coon coins Press O to buy\nScracoon price: "..formatNumber(player.scracoonPrice).." Coon coins Press P to buy\nPlushie price: " ..formatNumber(player.plushePrice.moneyPrice).."$ and "..formatNumber(player.plushePrice.coonPrice).." Coon coins Press A to buy (CAN ONLY BE BOUGHT ONCE!)",0,578-20*8)
+            love.graphics.print("Upgrade prices!\nHack mainframe price: "..formatNumber(player.hackPrice).." Coon coins Press O to buy\nScracoon price: "..formatNumber(player.scracoonPrice).." Coon coins Press P to buy\nPlushie price: " ..formatNumber(player.plushePrice.moneyPrice).."$ and "..formatNumber(player.plushePrice.coonPrice).." Coon coins Press A to buy (CAN ONLY BE BOUGHT ONCE!)".."\nServant price: "..formatNumber(player.servantPrice).." Coon coins Press S to buy",0,578-20*8)
             love.graphics.setColor(1,1,1)
         end
 
@@ -482,6 +500,15 @@ function upgradePlushie()
     player.plushie = 1
 end
 
+function upgradeServant()
+    upgradeSFX:play()
+    uTimer = 0
+    spawnServantHelper(sprite,love.math.random(200,700),love.math.random(0,350))
+    player.cooncoins = player.cooncoins - player.servantPrice
+    player.servantPrice = player.servantPrice * 1.05
+    player.racoonhelpers.amount = player.racoonhelpers.amount + 1
+end
+
 
 function spawnCryptoHelper(sprite,x,y)
     cryptoHelper = {}
@@ -513,6 +540,14 @@ function spawnHardHelper(sprite,x,y)
     hardHelper.x = x
     hardHelper.y = y
     table.insert(player.hardhelpers,hardHelper)
+end
+
+function spawnServantHelper(sprite,x,y)
+    servanthelper = {}
+    servanthelper.sprite = love.graphics.newImage("images/racoonHuman.png")
+    servanthelper.x = x
+    servanthelper.y = y
+    table.insert(player.racoonhelpers,servanthelper)
 end
 
 
@@ -554,10 +589,11 @@ function saveData()
         scracoonNumberLevel = player.scracoon,
         scracoonNumberPrice = player.scracoonPrice,
         audiolevel = slider.value,
-        pushielevel = player.plushie
+        pushielevel = player.plushie,
+        servantlevel = player.racoonhelpers.amount
     }
 
-    local jsonString = love.filesystem.write("savegame.txt", love.data.encode("string", "base64", table.concat({data.money, data.coonMoney, data.amountlevel,data.helpersnumber,data.multilevel,data.helperToysLevel,data.hacksLevel,data.hardHelpersNumber,data.queenhelperNumber,data.cryotohelpersNumber,data.amountlevelprice,data.helpersnumberprice,data.multilevelprice,data.helpersToysLevelprice,data.hacksLevelprice,data.hardHelpersNumberprice,data.queenhelperNumberprice,data.cryptohelpersNumberLevel,data.scracoonNumberLevel,data.scracoonNumberPrice,data.audiolevel,data.pushielevel}, ",")))
+    local jsonString = love.filesystem.write("savegame.txt", love.data.encode("string", "base64", table.concat({data.money, data.coonMoney, data.amountlevel,data.helpersnumber,data.multilevel,data.helperToysLevel,data.hacksLevel,data.hardHelpersNumber,data.queenhelperNumber,data.cryotohelpersNumber,data.amountlevelprice,data.helpersnumberprice,data.multilevelprice,data.helpersToysLevelprice,data.hacksLevelprice,data.hardHelpersNumberprice,data.queenhelperNumberprice,data.cryptohelpersNumberLevel,data.scracoonNumberLevel,data.scracoonNumberPrice,data.audiolevel,data.pushielevel,data.servantlevel}, ",")))
 end
 
 function loadData()
@@ -592,6 +628,7 @@ function loadData()
         player.scracoonPrice = tonumber(dataParts[20]) or 0
         slider.value = tonumber(dataParts[21]) or 0
         player.plushie = tonumber(dataParts[22]) or 0
+        player.racoonhelpers.amount = tonumber(dataParts[23]) or 0
         return true
     else
         return false
