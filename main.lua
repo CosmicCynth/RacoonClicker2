@@ -5,6 +5,7 @@ local titelFont = love.graphics.newFont("fonts/font.ttf",30)
 --Suit
 local slider = {value = 1, min = 0, max = 1}
 local checkbox = {checked = false, text = "Hide Helpers?"}
+local savecheck = false
 love.graphics.setFont(font)
 
 local suit = require"libaries/suit"
@@ -259,7 +260,12 @@ function love.update(dt)
         if love.keyboard.isDown("lctrl") or love.keyboard.isDown("lshift") or love.keyboard.isDown("tab") then
             if suit.Button("Save", 20,365).hit and uTimer >= uMtimer then
                 saveNloadSFX:play()
+                saveChecker(1)
+            end                                         
+
+            if savecheck == true and suit.Button("You sure?",20,340).hit and uTimer >= uMtimer then
                 saveData()
+                saveChecker(0)
             end
 
             if suit.Button("Load", 150,365).hit and uTimer >= uMtimer then
@@ -399,6 +405,13 @@ function love.mousepressed(x,y,button)
 end 
 
 --Functions!
+function saveChecker(argument)
+    if argument == 1 then
+        savecheck = true
+    elseif argument == 0 then
+        savecheck = false
+    end
+end
 
 function upgradeAmount()
     upgradeSFX:play()
