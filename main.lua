@@ -6,6 +6,7 @@ local titelFont = love.graphics.newFont("fonts/font.ttf",30)
 local slider = {value = 1, min = 0, max = 1}
 local checkbox = {checked = false, text = "Hide Helpers?"}
 local savecheck = false
+local page = 1
 love.graphics.setFont(font)
 
 local suit = require"libaries/suit"
@@ -14,14 +15,14 @@ function love.load()
     scene = "MainMenu"
 
     player = {}
-    player.clicks = 1000000
-    player.cooncoins = 12500
+    player.clicks = 0
+    player.cooncoins = 0
     player.amount = 1
-    player.multi = 1 
+    player.multi = 420
     player.helperToys = 1
-    player.hacks = 0
+    player.hacks = 10
     player.scracoon = 0
-    player.plushie = 0
+    player.plushie = 1
 
     player.helpers = {}
     player.helpers.amount = 0
@@ -104,11 +105,18 @@ function love.load()
     mTimer = 0
     mMTimer = 300
 
+    --Cutscene timer
+    cSTimer = 0
+    cSMTimer = 200
+
 
     --Background
     background = love.graphics.newImage("images/background.png")
     sBackground = love.graphics.newImage("images/Settingsbackground.png")
     mBackground = love.graphics.newImage("images/MainMenu.png")
+
+    ending1 = love.graphics.newImage("images/TheEndPage1.png")
+    ending2 = love.graphics.newImage("images/TheEndPage2.png")
 
     sTimer = 0
     sMTimer = 60
@@ -272,7 +280,11 @@ function love.update(dt)
                 saveNloadSFX:play()
                 loadData()
             end
+        else
+            saveChecker(0)
         end
+
+
 
         if suit.Button("Clicks shop",0,395).hit and uTimer >= uMtimer then
             shop = "clicks"
@@ -292,11 +304,27 @@ function love.update(dt)
         if suit.Button("Settings",width/2-55,height-460).hit then
             scene = "settings"
         end
+
+
+        if player.plushie == 1 and player.multi >= 420 and player.hacks >= 10 and suit.Button("The End?", width/2-60,height-420).hit then
+            scene = "theEnd"
+        end
     end
 
     if scene == "settings" then
         suit.Slider(slider, 100,100,160, 20)
         suit.Checkbox(checkbox,255,175,32,32)
+    end
+
+    if scene == "theEnd" then
+        cSTimer = cSTimer + 1
+        if cSTimer >= cSMTimer then
+            cSTimer = cSMTimer
+        end
+
+        if page == 4 then
+            scene = "MainMenu"
+        end
     end
 
     love.audio.setVolume(slider.value)
@@ -377,6 +405,16 @@ function love.draw()
         love.graphics.print("Controls!\n-To buy stuff read the upgrade prices!\n-To save hold either lshift, tab or lctrl \ndown and the buttons appear\n-Press esc to go back in menus or quit game\n Note worthy comment this game\n dosent have auto save so save before quitting\n and load when needed", 400,20)
     end
 
+    if scene == "theEnd" then
+        if page == 1 then
+            love.graphics.draw(ending1)
+        elseif page == 2 then
+            love.graphics.draw(ending2)
+        elseif page == 3 then
+            love.graphics.print("          THE END!\nTHANKS FOR PLAYING! <3",width/2-100,height/2-60)
+        end
+    end
+
     suit.draw()
 end
 
@@ -401,7 +439,11 @@ function love.mousepressed(x,y,button)
                 cTimer = 0
             end
         end
+    elseif scene == "theEnd" and cSTimer >= cSMTimer then
+        cSTimer = 0
+        page = page + 1
     end
+
 end 
 
 --Functions!
