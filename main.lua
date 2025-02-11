@@ -18,11 +18,11 @@ function love.load()
     player.clicks = 0
     player.cooncoins = 0
     player.amount = 1
-    player.multi = 420
+    player.multi = 0
     player.helperToys = 1
-    player.hacks = 10
+    player.hacks = 0
     player.scracoon = 0
-    player.plushie = 1
+    player.plushie = 0
 
     player.helpers = {}
     player.helpers.amount = 0
@@ -51,10 +51,10 @@ function love.load()
     player.scracoonPrice = 999
 
     player.plushePrice = {}
-    player.plushePrice.moneyPrice = 10000000000
+    player.plushePrice.moneyPrice = 100000000000
     player.plushePrice.coonPrice = 15000
 
-    player.servantPrice = 12500
+    player.servantPrice = 10000
 
 
     player.moods = {}
