@@ -7,7 +7,9 @@ local slider = {value = 1, min = 0, max = 1}
 local checkbox = {checked = false, text = "Hide Helpers?"}
 local savecheck = false
 local page = 1
+local rankPower = 0
 love.graphics.setFont(font)
+local FPS = love.timer.getFPS()
 
 local suit = require"libaries/suit"
 
@@ -18,7 +20,7 @@ function love.load()
     player.clicks = 0
     player.cooncoins = 0
     player.amount = 1
-    player.multi = 0
+    player.multi = 1
     player.helperToys = 1
     player.hacks = 0
     player.scracoon = 0
@@ -39,6 +41,9 @@ function love.load()
     player.racoonhelpers = {}
     player.racoonhelpers.amount = 0
 
+    player.racoonhunters = {}
+    player.racoonhunters.amount = 0
+
     player.amountPrice = 5
     player.clickCooldownPrice = 300
     player.helperPrice = 20
@@ -52,9 +57,10 @@ function love.load()
 
     player.plushePrice = {}
     player.plushePrice.moneyPrice = 100000000000
-    player.plushePrice.coonPrice = 15000
+    player.plushePrice.coonPrice = 13000
 
     player.servantPrice = 10000
+    player.hunterPrice = 1000000
 
 
     player.moods = {}
@@ -121,6 +127,14 @@ function love.load()
     sTimer = 0
     sMTimer = 60
 
+    --Ranks
+    bronze = love.graphics.newImage("images/BronzeRank.png")
+    silver = love.graphics.newImage("images/SilverRank.png")
+    gold = love.graphics.newImage("images/GoldRank.png")
+    platnium = love.graphics.newImage("images/PlatniumRank.png")
+    diamond = love.graphics.newImage("images/DIamondRank.png")
+    master = love.graphics.newImage("images/MasterRank.png")
+    challenger = love.graphics.newImage("images/ChallengerRank.png")
 end
 
 function love.update(dt)
@@ -175,7 +189,7 @@ function love.update(dt)
         if eGTimer >= eGMTimer and player.scracoon >= 1 then
             eGTimer = 0
             helperPaySFX:play()
-            player.clicks = player.clicks + 25000 * player.multi
+            player.clicks = player.clicks + player.scracoon * (25000 * player.multi)
             player.cooncoins = player.cooncoins + 3 + (player.cryptohelpers.amount / 2)
         end
         
@@ -186,6 +200,11 @@ function love.update(dt)
             player.clicks = player.clicks + 0.70 * (player.helpers.amount * player.multi * player.amount) * player.helperToys
             if player.hardhelpers.amount >= 1 then
                 player.clicks = player.clicks + player.hardhelpers.amount * 17 * player.multi * player.amount * player.helperToys
+            end
+            if player.racoonhunters.amount >= 1 then
+                player.clicks = player.clicks + player.multi * (250000 * player.racoonhunters.amount)
+                player.cooncoins = player.cooncoins + 600 * player.multi
+                player.scracoon = player.scracoon + 1
             end
         end
 
@@ -212,13 +231,15 @@ function love.update(dt)
             helperPaySFX:play()
             player.clicks = player.clicks + 35 * (player.queenhelpers.amount * player.multi * player.amount) * player.helperToys
             if player.racoonhelpers.amount >= 1 then
-                player.cooncoins = player.cooncoins + (17 * player.queenhelpers.amount)
+                player.cooncoins = player.cooncoins + player.racoonhelpers.amount * (17 * player.queenhelpers.amount)
                 player.clicks = player.clicks + 66666 * player.multi
             end
         end
 
         if love.keyboard.isDown("w") and uTimer >= uMtimer and player.clicks >= player.amountPrice then
             upgradeAmount()
+            rankPower = rankPower + 1
+            print("Rank power: "..rankPower)
         end
 
         if love.keyboard.isDown("q") and uTimer >= uMtimer and player.clicks >= player.clickCooldownPrice then
@@ -227,42 +248,68 @@ function love.update(dt)
 
         if love.keyboard.isDown("e") and uTimer >= uMtimer and player.clicks >= player.helperPrice then
             upgradeHelper()
+            rankPower = rankPower + 1
+            print("Rank power: "..rankPower)
         end
 
         if love.keyboard.isDown("r") and uTimer >= uMtimer and player.clicks >= player.hardHelperPrice then
             upgradeHardHelper()
+            rankPower = rankPower + 1
+            print("Rank power: "..rankPower)
         end
 
         if love.keyboard.isDown("t") and uTimer >= uMtimer and player.clicks >= player.multiPrice then
             upgradeMulti()
+            rankPower = rankPower + 1
+            print("Rank power: "..rankPower)
         end
 
         if love.keyboard.isDown("y") and uTimer >= uMtimer and player.clicks >= player.queenPrice then
             upgradeQueenHelper()
+            rankPower = rankPower + 1
+            print("Rank power: "..rankPower)
         end
 
         if love.keyboard.isDown("u") and uTimer >= uMtimer and player.clicks >= player.helperToysPrice then
             upgradeHelperToys()
+            rankPower = rankPower + 1
+            print("Rank power: "..rankPower)
         end
 
         if love.keyboard.isDown("i") and uTimer >= uMtimer and player.clicks >= player.cryptohelperPrice then
             upgradeCryptoRacoon()
+            rankPower = rankPower + 1
+            print("Rank power: "..rankPower)
         end
 
         if love.keyboard.isDown("o") and uTimer >= uMtimer and player.cooncoins >= player.hackPrice then
             upgradeHack()
+            rankPower = rankPower + 1
+            print("Rank power: "..rankPower)
         end
 
         if love.keyboard.isDown("p") and uTimer >= uMtimer and player.cooncoins >= player.scracoonPrice then
             upgradeScracoon()
+            rankPower = rankPower + 1
+            print("Rank power: "..rankPower)
         end
 
         if love.keyboard.isDown("a") and uTimer >= uMtimer and player.plushie == 0 and player.clicks >= player.plushePrice.moneyPrice and player.cooncoins >= player.plushePrice.coonPrice then
             upgradePlushie()
+            rankPower = rankPower + 1
+            print("Rank power: "..rankPower)
         end
 
         if love.keyboard.isDown("s") and uTimer >= uMtimer and player.cooncoins >= player.servantPrice then
             upgradeServant()
+            rankPower = rankPower + 1
+            print("Rank power: "..rankPower)
+        end
+
+        if love.keyboard.isDown("d") and uTimer >= uMtimer and player.cooncoins >= player.hunterPrice then
+            upgradeHunter()
+            rankPower = rankPower + 1
+            print("Rank power: "..rankPower)
         end
 
         if love.keyboard.isDown("lctrl") or love.keyboard.isDown("lshift") or love.keyboard.isDown("tab") then
@@ -306,7 +353,7 @@ function love.update(dt)
         end
 
 
-        if player.plushie == 1 and player.multi >= 420 and player.hacks >= 10 and suit.Button("The End?", width/2-60,height-420).hit then
+        if player.plushie == 1 and player.multi >= 150 and player.hacks >= 10 and suit.Button("The End?", width/2-60,height-420).hit then
             scene = "theEnd"
         end
     end
@@ -314,6 +361,10 @@ function love.update(dt)
     if scene == "settings" then
         suit.Slider(slider, 100,100,160, 20)
         suit.Checkbox(checkbox,255,175,32,32)
+
+        if suit.Button("Go back? (YOU CAN PRESS ESCAPE!)",0,0).hit then
+            scene = "MainMenu"
+        end
     end
 
     if scene == "theEnd" then
@@ -356,22 +407,42 @@ function love.draw()
                 love.graphics.draw(servant.sprite,servant.x,servant.y)
             end
 
+            for i, hunter in ipairs(player.racoonhunters) do
+                love.graphics.draw(hunter.sprite,hunter.x,hunter.y)
+            end
+
         end
 
         love.graphics.setFont(font)
         love.graphics.setColor(0,0,0)
-        love.graphics.print("Stats! \nMoney: "..formatNumber(player.clicks).."$\nCoon Coins: "..formatNumber(player.cooncoins).."$\nAmount level: "..player.amount.."\nCooldown: "..CMTimer.."\nHelper level: "..player.helpers.amount.."\nHard working\nhelper level: "..player.hardhelpers.amount.."\nMultiplier level: "..player.multi.."\nQueen level: "..player.queenhelpers.amount.."\nHelper toys level: "..(player.helperToys-1).."\nCrypto helper level: "..player.cryptohelpers.amount.."\nHacks on mainframe: "..player.hacks.."\nScracoon level: "..player.scracoon.."\nPlushie level: "..player.plushie.."\nServant level:"..player.racoonhelpers.amount)
+        love.graphics.print("Stats! \nMoney: "..formatNumber(player.clicks).."$\nCoon Coins: "..formatNumber(player.cooncoins).."$\nAmount level: "..player.amount.."\nCooldown: "..CMTimer.."\nHelper level: "..player.helpers.amount.."\nHard working\nhelper level: "..player.hardhelpers.amount.."\nMultiplier level: "..player.multi.."\nQueen level: "..player.queenhelpers.amount.."\nHelper toys level: "..(player.helperToys-1).."\nCrypto helper level: "..player.cryptohelpers.amount.."\nHacks on mainframe: "..player.hacks.."\nScracoon level: "..player.scracoon.."\nPlushie level: "..player.plushie.."\nServant level: "..player.racoonhelpers.amount.."\nHunter level: "..player.racoonhunters.amount)
         
         if shop == "clicks" then
             love.graphics.print("Upgrade prices! \nAmount price: "..formatNumber(player.amountPrice).."$ Press W to buy\nCooldown price: "..formatNumber(player.clickCooldownPrice).."$ Press Q to buy\nHelper price: "..formatNumber(player.helperPrice).."$ Press E to buy\nHard working helper price: "..formatNumber(player.hardHelperPrice).."$ Press R to buy\nMultiplier price: "..formatNumber(player.multiPrice).."$ Press T to buy".."\nQueen price: "..formatNumber(player.queenPrice).."$ Press Y to buy".."\nHelper toys price: "..formatNumber(player.helperToysPrice).."$ Press U to buy".."\nCrypto helper price: "..formatNumber(player.cryptohelperPrice).."$ Press I to buy",0,578-20*8)
             love.graphics.setColor(1,1,1)
         elseif shop == "coon" then
-            love.graphics.print("Upgrade prices!\nHack mainframe price: "..formatNumber(player.hackPrice).." Coon coins Press O to buy\nScracoon price: "..formatNumber(player.scracoonPrice).." Coon coins Press P to buy\nPlushie price: " ..formatNumber(player.plushePrice.moneyPrice).."$ and "..formatNumber(player.plushePrice.coonPrice).." Coon coins Press A to buy (CAN ONLY BE BOUGHT ONCE!)".."\nServant price: "..formatNumber(player.servantPrice).." Coon coins Press S to buy",0,578-20*8)
+            love.graphics.print("Upgrade prices!\nHack mainframe price: "..formatNumber(player.hackPrice).." Coon coins Press O to buy\nScracoon price: "..formatNumber(player.scracoonPrice).." Coon coins Press P to buy\nPlushie price: " ..formatNumber(player.plushePrice.moneyPrice).."$ and "..formatNumber(player.plushePrice.coonPrice).." Coon coins Press A to buy (CAN ONLY BE BOUGHT ONCE!)".."\nServant price: "..formatNumber(player.servantPrice).." Coon coins Press S to buy".."\nHunter price: "..formatNumber(player.hunterPrice).." Coon coins Press D to buy",0,578-20*8)
             love.graphics.setColor(1,1,1)
         end
 
         if player.plushie == 1 then
             love.graphics.draw(player.plusheSprite,500,height-250)
+        end
+
+        if rankPower >= 0 and rankPower < 50 then
+            love.graphics.draw(bronze,400-128,0)
+        elseif rankPower >= 50 and rankPower < 105 then
+            love.graphics.draw(silver,400-128,0)
+        elseif rankPower >= 105 and rankPower < 200 then
+            love.graphics.draw(gold,400-128,0)
+        elseif rankPower >= 200 and rankPower < 300 then
+            love.graphics.draw(platnium,400-128,0)
+        elseif rankPower >= 300 and rankPower < 390 then
+            love.graphics.draw(diamond,400-128,0)
+        elseif rankPower >= 390 and rankPower < 445 then
+            love.graphics.draw(master,400-128,0)
+        elseif rankPower >= 445 then
+            love.graphics.draw(challenger,400-128,0)
         end
 
 
@@ -414,7 +485,8 @@ function love.draw()
             love.graphics.print("          THE END!\nTHANKS FOR PLAYING! <3",width/2-100,height/2-60)
         end
     end
-
+    FPS = love.timer.getFPS()
+    print(FPS)
     suit.draw()
 end
 
@@ -564,6 +636,22 @@ function upgradeServant()
     player.racoonhelpers.amount = player.racoonhelpers.amount + 1
 end
 
+function upgradeHunter()
+    upgradeSFX:play()
+    uTimer = 0
+    spawnHunterHelper(sprite,love.math.random(200,700),love.math.random(0,350))
+    player.cooncoins = player.cooncoins - player.hunterPrice
+    player.hunterPrice = player.hunterPrice * 1.25
+    player.racoonhunters.amount = player.racoonhunters.amount + 1
+end
+
+function spawnHunterHelper(sprite,x,y)
+    hunterHelper = {}
+    hunterHelper.sprite = love.graphics.newImage("images/racoonHunter.png")
+    hunterHelper.x = x
+    hunterHelper.y = y
+    table.insert(player.racoonhunters,hunterHelper)
+end
 
 function spawnCryptoHelper(sprite,x,y)
     cryptoHelper = {}
@@ -645,10 +733,14 @@ function saveData()
         scracoonNumberPrice = player.scracoonPrice,
         audiolevel = slider.value,
         pushielevel = player.plushie,
-        servantlevel = player.racoonhelpers.amount
+        servantlevel = player.racoonhelpers.amount,
+        servantlevelPrice = player.servantPrice,
+        ranklevel = rankPower,
+        hunterNumberLevel = player.racoonhunters.amount,
+        hunterNumberPrice = player.hunterPrice
     }
 
-    local jsonString = love.filesystem.write("savegame.txt", love.data.encode("string", "base64", table.concat({data.money, data.coonMoney, data.amountlevel,data.helpersnumber,data.multilevel,data.helperToysLevel,data.hacksLevel,data.hardHelpersNumber,data.queenhelperNumber,data.cryotohelpersNumber,data.amountlevelprice,data.helpersnumberprice,data.multilevelprice,data.helpersToysLevelprice,data.hacksLevelprice,data.hardHelpersNumberprice,data.queenhelperNumberprice,data.cryptohelpersNumberLevel,data.scracoonNumberLevel,data.scracoonNumberPrice,data.audiolevel,data.pushielevel,data.servantlevel}, ",")))
+    local jsonString = love.filesystem.write("savegame.txt", love.data.encode("string", "base64", table.concat({data.money, data.coonMoney, data.amountlevel,data.helpersnumber,data.multilevel,data.helperToysLevel,data.hacksLevel,data.hardHelpersNumber,data.queenhelperNumber,data.cryotohelpersNumber,data.amountlevelprice,data.helpersnumberprice,data.multilevelprice,data.helpersToysLevelprice,data.hacksLevelprice,data.hardHelpersNumberprice,data.queenhelperNumberprice,data.cryptohelpersNumberLevel,data.scracoonNumberLevel,data.scracoonNumberPrice,data.audiolevel,data.pushielevel,data.servantlevel,data.servantlevelPrice,data.ranklevel,data.hunterNumberLevel,data.hunterNumberPrice}, ",")))
 end
 
 function loadData()
@@ -671,19 +763,24 @@ function loadData()
         player.hardhelpers.amount = tonumber(dataParts[8]) or 0
         player.queenhelpers.amount = tonumber(dataParts[9]) or 0
         player.cryptohelpers.amount = tonumber(dataParts[10]) or 0
-        player.amountprice = tonumber(dataParts[11]) or 0
-        player.helperPrice = tonumber(dataParts[12]) or 0
-        player.multiPrice = tonumber(dataParts[13]) or 0
-        player.helperToysPrice = tonumber(dataParts[14]) or 0
-        player.hackPrice =  tonumber(dataParts[15]) or 0
-        player.hardHelperPrice = tonumber(dataParts[16]) or 0
-        player.queenPrice = tonumber(dataParts[17]) or 0
-        player.cryptohelperPrice = tonumber(dataParts[18]) or 0
+        player.amountPrice = tonumber(dataParts[11]) or 5
+        player.helperPrice = tonumber(dataParts[12]) or 20
+        player.multiPrice = tonumber(dataParts[13]) or 125000
+        player.helperToysPrice = tonumber(dataParts[14]) or 50000
+        player.hackPrice =  tonumber(dataParts[15]) or 100
+        player.hardHelperPrice = tonumber(dataParts[16]) or 2000
+        player.queenPrice = tonumber(dataParts[17]) or 1000000
+        player.cryptohelperPrice = tonumber(dataParts[18]) or 10000000
         player.scracoon = tonumber(dataParts[19]) or 0
-        player.scracoonPrice = tonumber(dataParts[20]) or 0
-        slider.value = tonumber(dataParts[21]) or 0
+        player.scracoonPrice = tonumber(dataParts[20]) or 999
+        slider.value = tonumber(dataParts[21]) or 1
         player.plushie = tonumber(dataParts[22]) or 0
         player.racoonhelpers.amount = tonumber(dataParts[23]) or 0
+        player.servantPrice = tonumber(dataParts[24]) or 10000
+        rankPower = tonumber(dataParts[25]) or 0
+        player.racoonhunters.amount = tonumber(dataParts[26]) or 0
+        player.hunterPrice = tonumber(dataParts[27]) or 1000000
+
         return true
     else
         return false
